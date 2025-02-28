@@ -33,4 +33,9 @@ Problems:
 I already had a backend from another project and just had to make minor adjustements
 
 ## Step 5: Create React frontend
-I already had a frontend from another project and just had to make minor adjustements
+I already had a frontend from another project and just had to make minor adjustements.
+There is a text box and a button "Search".
+
+## Step 6: Connect frontend and backend
+When page is loaded, information from database is downloaded.
+When user clicks the button search, the tags are searched for the text in the textbox. If images are tagged with this search item they are downloaded from the AWS S3 bucket and displayed. The images are cached to diminish download time in the future.
