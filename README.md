@@ -41,4 +41,4 @@ When page is loaded, information from database is downloaded.
 When user clicks the button search, the tags are searched for the text in the textbox. If images are tagged with this search item they are downloaded from the AWS S3 bucket and displayed. The images are cached to diminish download time in the future.
 
 This is the first working state of the application:
-![Alt Text](assets/first_working_version.png)
+![](assets/first_working_version.png)
