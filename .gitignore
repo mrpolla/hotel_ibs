@@ -3,3 +3,4 @@
 /dataset/*
 **/node_modules/
 *.csv
+*.log

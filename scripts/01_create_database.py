@@ -81,7 +81,6 @@ for _, row in chain_info.iterrows():
 
 # Insert data into hotels
 for _, row in hotel_info.iterrows():
-    # Generate availability and price per night for 30 days
     try:
         cursor.execute(
             "INSERT INTO hotels (hotel_id, hotel_name, chain_id, latitude, longitude) VALUES (%s, %s, %s, %s, %s) ON CONFLICT (hotel_id) DO NOTHING;",
