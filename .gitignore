@@ -1,0 +1,5 @@
+.env
+/images/*
+/dataset/*
+**/node_modules/
+*.csv
