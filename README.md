@@ -11,7 +11,7 @@ Create PostgreSQL database 'hotel_ibs' with tables:
 - hotel
 - chain
 - images
-- 
+  
 Problems: again, the dataset is huge so I had to only create part of the entries.
 
 ## Step 3: Tag images
@@ -39,3 +39,6 @@ There is a text box and a button "Search".
 ## Step 6: Connect frontend and backend
 When page is loaded, information from database is downloaded.
 When user clicks the button search, the tags are searched for the text in the textbox. If images are tagged with this search item they are downloaded from the AWS S3 bucket and displayed. The images are cached to diminish download time in the future.
+
+This is the first working state of the application:
+![Alt Text](assets/first_working_version.png)
