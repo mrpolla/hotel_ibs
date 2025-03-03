@@ -1,98 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
+  // State to store the search query and images returned for that query.
   const [query, setQuery] = useState('');
-  const [images, setImages] = useState([]);
   const [filteredImages, setFilteredImages] = useState([]);
 
-  useEffect(() => {
-    const cachedImageIds = localStorage.getItem('imageIds');
-    
-    if (cachedImageIds) {
-      const parsedImageIds = JSON.parse(cachedImageIds);
-      fetchImagesByIds(parsedImageIds);
-    } else {
-      fetchAllImages();
-    }
-  }, []);
-
-  const fetchAllImages = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/images');
-      const data = await response.json();
-      console.log('Fetched images:', data);
-
-      // Store only image IDs in localStorage
-      const imageIds = data.map(img => img.id);
-      localStorage.setItem('imageIds', JSON.stringify(imageIds));
-
-      setImages(data);
-    } catch (error) {
-      console.error('Error fetching images:', error);
-    }
-  };
-
-  const fetchImagesByIds = async (imageIds) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/images?ids=${imageIds.join(',')}`);
-      const data = await response.json();
-      setImages(data);
-    } catch (error) {
-      console.error('Error fetching images by IDs:', error);
-    }
-  };
-
-  const isExpired = (url) => {
+  // Check if a pre-signed URL is expired.
+  const isUrlExpired = (url) => {
     const match = url.match(/X-Amz-Expires=(\d+)/);
     if (!match) return true;
 
     const expiresInSeconds = parseInt(match[1], 10);
-    const creationTime = new Date().getTime() - expiresInSeconds * 1000;
-
-    return new Date().getTime() > creationTime;
+    const creationTime = Date.now() - expiresInSeconds * 1000;
+    return Date.now() > creationTime;
   };
 
-  const handleSearch = async () => {
-    console.log('Search query:', query);
-    
-    const filtered = images.filter(image => 
-      image.tags.some(tag => tag.tag_name.toLowerCase().includes(query.toLowerCase()))
+  // Fetch a new pre-signed URL for a specific image.
+  const fetchNewUrl = async (imageId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/image/${imageId}`);
+      const updatedImage = await response.json();
+      return updatedImage.image_url;
+    } catch (error) {
+      console.error(`Error fetching new URL for image ${imageId}:`, error);
+      return null;
+    }
+  };
+
+  // Download an image and convert it into an object URL.
+  const downloadImageUrl = async (url) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      return null;
+    }
+  };
+
+  // Fetch images from the backend based on the search query.
+  const fetchImagesByTag = async (tag) => {
+    const response = await fetch(
+      `http://localhost:5000/api/images?tag=${encodeURIComponent(tag)}`
     );
+    const data = await response.json();
+    return data;
+  };
 
-    console.log('Filtered images:', filtered);
-
-    const updatedImages = await Promise.all(filtered.map(async (image) => {
-      if (!image.image_url || isExpired(image.image_url)) {
-        // Fetch new pre-signed URL for the image
-        try {
-          const response = await fetch(`http://localhost:5000/api/image/${image.id}`);
-          const updatedImage = await response.json();
-          return { ...image, image_url: updatedImage.image_url };
-        } catch (error) {
-          console.error(`Error fetching new URL for image ${image.id}`, error);
-          return image; // Return old image in case of an error
+  // Update images with expired pre-signed URLs.
+  const updateExpiredUrls = async (images) => {
+    return await Promise.all(
+      images.map(async (image) => {
+        if (!image.image_url || isUrlExpired(image.image_url)) {
+          const newUrl = await fetchNewUrl(image.id);
+          return newUrl ? { ...image, image_url: newUrl } : image;
         }
-      }
-      return image;
-    }));
-
-    // Download images and create object URLs
-    const downloadedImages = await Promise.all(
-      updatedImages.map(async (image) => {
-        try {
-          const response = await fetch(image.image_url);
-          const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
-          return { ...image, downloaded_url: url };
-        } catch (error) {
-          console.error(`Error downloading image ${image.id}`, error);
-          return image;
-        }
+        return image;
       })
     );
+  };
 
-    setFilteredImages(downloadedImages);
+  // Download images and attach object URLs for display.
+  const downloadImages = async (images) => {
+    return await Promise.all(
+      images.map(async (image) => {
+        const downloaded_url = await downloadImageUrl(image.image_url);
+        return downloaded_url ? { ...image, downloaded_url } : image;
+      })
+    );
+  };
+
+  // Handle search operation: fetch images, update URLs, download images, and update state.
+  const handleSearch = async () => {
+    if (query.trim() === '') return; // Do nothing if query is empty.
+    console.log('Searching for images with tag:', query);
+
+    try {
+      // Step 1: Fetch images based on the queried tag.
+      const imagesByTag = await fetchImagesByTag(query);
+      console.log('Images fetched for query:', imagesByTag);
+
+      // Step 2: Update expired pre-signed URLs if needed.
+      const imagesWithUpdatedUrls = await updateExpiredUrls(imagesByTag);
+
+      // Step 3: Download images to generate object URLs.
+      const finalImages = await downloadImages(imagesWithUpdatedUrls);
+
+      // Step 4: Update state with the processed images.
+      setFilteredImages(finalImages);
+    } catch (error) {
+      console.error('Error fetching images for query:', error);
+    }
   };
 
   return (
@@ -102,6 +102,7 @@ function App() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         placeholder="Enter image tag"
         className="input"
       />
@@ -110,7 +111,12 @@ function App() {
       </button>
       <div className="image-container">
         {filteredImages.map((image, index) => (
-          <img key={index} src={image.downloaded_url || image.image_url} alt={image.tags.map(tag => tag.tag_name).join(', ')} className="image" />
+          <img
+            key={index}
+            src={image.downloaded_url || image.image_url}
+            alt={image.tags.map((tag) => tag.tag_name).join(', ')}
+            className="image"
+          />
         ))}
       </div>
     </div>
