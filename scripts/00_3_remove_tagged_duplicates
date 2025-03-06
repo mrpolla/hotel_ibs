@@ -1,0 +1,20 @@
+import pandas as pd
+
+def remove_duplicates(input_csv, output_csv, column_name):
+    # Load CSV file into a DataFrame
+    df = pd.read_csv(input_csv)
+    
+    # Drop duplicates, keeping only the first occurrence
+    df_unique = df.drop_duplicates(subset=[column_name], keep='first')
+    
+    # Save the cleaned DataFrame to a new CSV file
+    df_unique.to_csv(output_csv, index=False)
+    
+    print(f"Duplicates removed. Unique entries saved to {output_csv}")
+
+if __name__ == "__main__":
+    input_csv = "./scripts/tagged_images.csv"  # Change this to your CSV file
+    output_csv = "./scripts/tagged_images_unique.csv"  # Output file
+    column_name = "image_id"  # Column to check for duplicates
+    
+    remove_duplicates(input_csv, output_csv, column_name)

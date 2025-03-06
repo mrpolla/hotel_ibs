@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
   // State to store the search query and images returned for that query.
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [filteredImages, setFilteredImages] = useState([]);
 
   // Check if a pre-signed URL is expired.
@@ -19,7 +19,9 @@ function App() {
   // Fetch a new pre-signed URL for a specific image.
   const fetchNewUrl = async (imageId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/image/${imageId}`);
+      const response = await fetch(
+        `http://localhost:5000/api/image/${imageId}`
+      );
       const updatedImage = await response.json();
       return updatedImage.image_url;
     } catch (error) {
@@ -35,7 +37,7 @@ function App() {
       const blob = await response.blob();
       return URL.createObjectURL(blob);
     } catch (error) {
-      console.error('Error downloading image:', error);
+      console.error("Error downloading image:", error);
       return null;
     }
   };
@@ -74,13 +76,13 @@ function App() {
 
   // Handle search operation: fetch images, update URLs, download images, and update state.
   const handleSearch = async () => {
-    if (query.trim() === '') return; // Do nothing if query is empty.
-    console.log('Searching for images with tag:', query);
+    if (query.trim() === "") return; // Do nothing if query is empty.
+    console.log("Searching for images with tag:", query);
 
     try {
       // Step 1: Fetch images based on the queried tag.
       const imagesByTag = await fetchImagesByTag(query);
-      console.log('Images fetched for query:', imagesByTag);
+      console.log("Images fetched for query:", imagesByTag);
 
       // Step 2: Update expired pre-signed URLs if needed.
       const imagesWithUpdatedUrls = await updateExpiredUrls(imagesByTag);
@@ -91,7 +93,7 @@ function App() {
       // Step 4: Update state with the processed images.
       setFilteredImages(finalImages);
     } catch (error) {
-      console.error('Error fetching images for query:', error);
+      console.error("Error fetching images for query:", error);
     }
   };
 
@@ -102,7 +104,7 @@ function App() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         placeholder="Enter image tag"
         className="input"
       />
@@ -114,7 +116,7 @@ function App() {
           <img
             key={index}
             src={image.downloaded_url || image.image_url}
-            alt={image.tags.map((tag) => tag.tag_name).join(', ')}
+            alt={image.tags.map((tag) => tag.tag_name).join(", ")}
             className="image"
           />
         ))}

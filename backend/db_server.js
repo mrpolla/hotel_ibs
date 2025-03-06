@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-const AWS = require('aws-sdk');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const { Pool } = require("pg");
+const AWS = require("aws-sdk");
+require("dotenv").config();
 
 const app = express();
 const port = 5000;
@@ -28,7 +28,7 @@ const s3 = new AWS.S3({
 });
 
 // API endpoint to get images joined with hotels filtered by a queried tag.
-app.get('/api/images', async (req, res) => {
+app.get("/api/images", async (req, res) => {
   try {
     const { tag } = req.query;
 
@@ -69,11 +69,11 @@ app.get('/api/images', async (req, res) => {
     const images = result.rows;
 
     // Generate pre-signed URLs for each image.
-    const updatedImages = images.map(image => {
-      console.log('Original image_url:', image.image_url);
-      const signedUrl = s3.getSignedUrl('getObject', {
+    const updatedImages = images.map((image) => {
+      console.log("Original image_url:", image.image_url);
+      const signedUrl = s3.getSignedUrl("getObject", {
         Bucket: process.env.AWS_S3_bucket,
-        Key: image.image_url.replace(/^\.\//, ''), // Remove a leading "./" if present.
+        Key: image.image_url.replace(/^\.\//, ""), // Remove a leading "./" if present.
         Expires: 60 * 60, // URL expiration time in seconds (e.g., 1 hour)
       });
       return { ...image, image_url: signedUrl };
@@ -81,8 +81,8 @@ app.get('/api/images', async (req, res) => {
 
     res.json(updatedImages);
   } catch (error) {
-    console.error('Error fetching images:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching images:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
