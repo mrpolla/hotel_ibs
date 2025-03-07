@@ -20,10 +20,11 @@ body {
 
 .input {
   padding: 10px;
-  width: 300px;
+  width: 150px;
   font-size: 1em;
   border-radius: 5px;
   border: 1px solid #ccc;
+  margin-right: 10px; /* Add margin to the right */
 }
 
 .button {
@@ -46,12 +47,20 @@ body {
   display: flex;
   gap: 40px; /* Add space between the containers */
   align-items: flex-start; /* Align items to the top */
+  max-height: calc(
+    100vh - 250px
+  ); /* Limit height to available space until the hotel table */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .image-container-sub-wrapper {
-  gap: 40px; /* Add space between the containers */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Add space between the containers */
   align-items: flex-start; /* Align items to the top */
   flex: 1; /* Make the containers take up equal space */
+  max-height: 100%; /* Limit height to available space */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .image-container-label {
@@ -65,7 +74,9 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 10px;
-  max-height: 800px; /* Set the maximum height */
+  height: calc(
+    100vh - 250px - 60px - 40px - 200px
+  ); /* Calculate height based on available space */
   overflow-y: auto; /* Enable vertical scrolling */
   padding: 10px; /* Add padding to the borders */
   border: 1px solid #ccc; /* Add border around the container */
@@ -105,4 +116,78 @@ body {
   background-color: #007bff;
   width: 0;
   transition: width 0.3s;
+}
+
+/* Add styles for the hotel names table */
+.hotel-names-table {
+  margin-top: 20px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #282c34;
+  height: 220px; /* Fixed height for 5 rows */
+}
+
+.hotel-names-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hotel-names-table thead {
+  background-color: #1a1d23;
+  display: table;
+  width: calc(100% - 8px); /* Account for scrollbar width */
+  table-layout: fixed;
+}
+
+.hotel-names-table th {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #444;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #1a1d23;
+}
+
+.hotel-names-table tbody {
+  display: block;
+  height: calc(100% - 46px); /* Subtract header height */
+  overflow-y: auto;
+}
+
+.hotel-names-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.hotel-names-table td {
+  padding: 12px;
+  border-bottom: 1px solid #444;
+  color: #fff;
+}
+
+.hotel-names-table tr:hover {
+  background-color: #363a43;
+}
+
+/* Ensure the euro symbol aligns properly */
+.hotel-names-table td:last-child {
+  text-align: right;
+}
+
+/* Customize scrollbar for the table */
+.hotel-names-table tbody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hotel-names-table tbody::-webkit-scrollbar-track {
+  background: #1a1d23;
+}
+
+.hotel-names-table tbody::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 4px;
 }

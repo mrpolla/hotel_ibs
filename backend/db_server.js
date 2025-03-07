@@ -27,10 +27,10 @@ const s3 = new AWS.S3({
   region: process.env.AWS_S3_region,
 });
 
-// API endpoint to get images joined with hotels filtered by a queried tag.
+// API endpoint to get images joined with hotels filtered by a queried tag and price range.
 app.get("/api/images", async (req, res) => {
   try {
-    const { tag } = req.query;
+    const { tag, minPrice, maxPrice, startDate, endDate } = req.query;
 
     // Return an empty array if no tag is provided.
     if (!tag) {
@@ -50,12 +50,16 @@ app.get("/api/images", async (req, res) => {
                   json_build_object('tag_name', image_tags.tag_name, 'confidence_score', image_tags.confidence_score)
               ) FILTER (WHERE image_tags.tag_name IS NOT NULL),
               '[]'
-          ) AS tags 
+          ) AS tags,
+          AVG(availability_price.price) AS avg_price_per_night
       FROM 
           images 
       JOIN hotels ON images.hotel_id = hotels.hotel_id
       LEFT JOIN image_tags ON images.image_id = image_tags.image_id::TEXT
+      LEFT JOIN availability_price ON hotels.hotel_id = availability_price.hotel_id
       WHERE image_tags.tag_name ILIKE $1
+      AND availability_price.price BETWEEN $2 AND $3
+      AND availability_price.date BETWEEN $4 AND $5
       GROUP BY 
           images.image_id,
           hotels.hotel_name,
@@ -63,8 +67,13 @@ app.get("/api/images", async (req, res) => {
           hotels.longitude;
     `;
 
-    // Execute the query with the tag as parameter.
-    const values = [`%${tag}%`];
+    // Execute the query with the tag, price range, and date range as parameters.
+    const values = [`%${tag}%`, minPrice, maxPrice, startDate, endDate];
+
+    // Print the query and its parameters
+    console.log("Executing query:", queryText);
+    console.log("With values:", values);
+
     const result = await pool.query(queryText, values);
     const images = result.rows;
 
