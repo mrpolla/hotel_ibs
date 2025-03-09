@@ -42,3 +42,9 @@ When user clicks the button search, the tags are searched for the text in the te
 
 This is the first working state of the application:
 ![](assets/first_working_version.png)
+
+## Step 7: New dataset from Google
+The images from the original dataset only contained photos of the insides of the rooms, and I wanted more photos from the hotel and hotel facilities (pool, restaurant, ...) so I created a script to download 10 images per hotel from a pre-filtered hotel list. 
+I also reduced the amount of hotels from xx thousand to xx hundreds. At the end I had ~4000 images from the original dataset and ~2000 from google. I had to retag them and re-uploaded the new complete set (~6000 images) to AWS and updated the database correspondingly. 
+
+## Step 8: Adapted Frontend to include filtering hotels by availability and price.
